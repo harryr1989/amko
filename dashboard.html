@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Dashboard</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap">
+  <style>
+    :root{--sb-bg:#0d1b2a;--sb-fg:#cbd5e1;--sb-ac:#3b82f6;--sb-acfg:#fff}
+    body{margin:0;font-family:Inter,system-ui,Arial,Helvetica,sans-serif}
+    .layout{display:grid;grid-template-columns:260px 1fr;min-height:100vh}
+    .sidebar{background:var(--sb-bg);color:var(--sb-fg);padding:16px 12px;position:sticky;top:0;height:100vh}
+    .brand{color:#fff;font-weight:700;font-size:18px;padding:8px 10px;margin-bottom:8px}
+    .nav{display:flex;flex-direction:column;gap:4px}
+    .nav a{color:var(--sb-fg);text-decoration:none;padding:10px 12px;border-radius:8px;display:flex;gap:10px;align-items:center}
+    .nav a:hover{background:rgba(255,255,255,.06)}
+    .nav a.active{background:var(--sb-ac);color:var(--sb-acfg)}
+    .nav .section{margin:10px 8px 4px;font-size:11px;letter-spacing:.04em;color:#94a3b8;text-transform:uppercase}
+    .main{background:#f5f7fa;min-height:100vh}
+    .main > header{background:#fff;border-bottom:1px solid #e5e7eb;padding:12px 16px;display:flex;justify-content:space-between;align-items:center}
+    .me-pill{background:#eef2ff;color:#1f2937;border-radius:999px;padding:4px 10px;font-size:12px}
+    @media(max-width:860px){
+      .layout{grid-template-columns:1fr}
+      .sidebar{position:fixed;left:-270px;transition:left .2s ease;z-index:30}
+      .sidebar.show{left:0}
+      .main{padding-top:52px}
+      .hamburger{position:fixed;left:12px;top:10px;z-index:40}
+    }
+    .btn{border:none;border-radius:8px;padding:8px 12px;cursor:pointer}
+    .btn-ghost{background:#eef3ff}
+    .content{padding:16px}
+  </style>
+</head>
+<body>
+  <script>window.__ACTIVE_SIDEBAR_KEY = 'dashboard';</script>
+
+  <div class="layout">
+    <aside id="sb" class="sidebar">
+      <div class="brand">AMKO</div>
+      <div class="section">Menu</div>
+      <nav class="nav">
+        <a id="sb-dashboard" href="dashboard.html">🏠 Dashboard</a>
+        <a id="sb-master" href="master-saldo-akun.html">💳 Master Akun Saldo</a>
+        <a id="sb-atm" href="transaksi-mini-atm.html">🏧 Transaksi Mini ATM</a>
+        <a id="sb-users" href="manajemen-pengguna.html" style="display:none">👥 Manajemen Pengguna</a>
+        <a id="sb-logout" href="#" onclick="return false;">🚪 Logout</a>
+      </nav>
+    </aside>
+
+    <div class="main">
+      <header>
+        <button class="btn btn-ghost hamburger" onclick="document.getElementById('sb').classList.toggle('show')">☰</button>
+        <div id="page_title">Dashboard</div>
+        <div class="me-pill" id="me_badge">Memuat…</div>
+      </header>
+
+      <!-- ====== KONTEN DASHBOARD ====== -->
+      <div class="content">
+        <h2>Selamat datang di Dashboard</h2>
+        <p>Ini adalah halaman ringkasan operasional AMKO.</p>
+        <!-- tambahkan widget ringkasan sesuai kebutuhan -->
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    const supabaseUrl = "https://saohnqxderqfuvgfvoam.supabase.co";
+    const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNhb2hucXhkZXJxZnV2Z2Z2b2FtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc2MjUzNjksImV4cCI6MjA3MzIwMTM2OX0.oKexUwapMuRr4PqBz78sG2IXML0_ZGRGoT9K3vYB7_M";
+    const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+    async function initSidebar(activeKey, pageTitle){
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) { location.href = 'login.html'; return; }
+
+      const { data: p, error } = await supabase
+        .from('profiles').select('full_name, role, branch_code, email').eq('id', user.id).single();
+
+      if (error) { console.error(error); alert('Gagal ambil profil'); return; }
+      // Refresh legacy localStorage session for pages that still check it
+      try {
+        const legacyAuth = {
+          username: user.email,
+          name: p.full_name || p.email,
+          role: p.role,
+          branch: p.branch_code
+        };
+        localStorage.setItem('amko.auth', JSON.stringify(legacyAuth));
+        localStorage.setItem('amko.auth:exp', String(Date.now() + 12*60*60*1000));
+      } catch(_) {}
+    
+
+      document.getElementById('me_badge').textContent =
+        `${p.role} • ${p.full_name || p.email} • ${p.branch_code || '-'}`;
+
+      if (p.role === 'owner') document.getElementById('sb-users').style.display = 'block';
+
+      const idMap = { dashboard: 'sb-dashboard', master: 'sb-master', atm: 'sb-atm', users: 'sb-users' };
+      const el = document.getElementById(idMap[activeKey]);
+      if (el) el.classList.add('active');
+
+      document.getElementById('page_title').textContent = pageTitle;
+
+      document.getElementById('sb-logout').onclick = async () => {
+        await supabase.auth.signOut();
+        location.href = 'login.html';
+      };
+    }
+
+    initSidebar(window.__ACTIVE_SIDEBAR_KEY || 'dashboard', 'Dashboard');
+  </script>
+</body>
+</html>

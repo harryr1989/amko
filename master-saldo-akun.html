@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Master Akun Saldo | AMKO</title>
+  <style>
+    :root{
+      --bg:#ecf1f7; --sb:#0d1b2a; --sbfg:#cbd5e1; --pri:#1363df;
+      --card:#fff; --bd:#e5e7eb; --muted:#64748b; --txt:#0f172a;
+      --blue:#1d4ed8; --amber:#d97706; --yellow:#f59e0b; --red:#be123c; --green:#16a34a;
+      --shadow:0 6px 18px rgba(15,23,42,.08);
+      --radius:18px;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Inter,system-ui,Segoe UI,Arial;background:var(--bg);color:var(--txt)}
+    /* Layout + Sidebar */
+    .layout{display:grid;grid-template-columns:240px 1fr;min-height:100vh}
+    .sidebar{background:var(--sb);color:var(--sbfg);padding:18px 14px}
+    .brand{color:#fff;font-weight:800;font-size:20px;margin-bottom:18px}
+    .nav{display:flex;flex-direction:column;gap:6px}
+    .nav a{color:var(--sbfg);text-decoration:none;padding:10px 12px;border-radius:10px}
+    .nav a:hover{background:rgba(255,255,255,.10)}
+    .nav a.active{background:var(--pri);color:#fff}
+    /* Header & bar atas */
+    header{background:#fff;border-bottom:1px solid var(--bd);padding:16px;display:flex;justify-content:space-between;align-items:center}
+    .content{padding:20px;max-width:1250px;margin:0 auto}
+    .topbar{display:grid;grid-template-columns:1fr 520px;gap:12px;align-items:center;margin-bottom:18px}
+    .btn{border:none;border-radius:10px;padding:12px 14px;cursor:pointer;font-weight:600}
+    .btn-primary{background:#0b63f3;color:#fff}
+    .searchbar{display:grid;grid-template-columns:1fr 90px 90px;gap:8px}
+    .input{border:1px solid var(--bd);background:#fff;border-radius:10px;padding:12px 12px;font-size:14px;outline:none}
+    .btn-blue{background:#2563eb;color:#fff}
+    .btn-gray{background:#efefef}
+    /* Grid kartu */
+    .grid{display:grid;grid-template-columns:repeat(3,minmax(280px,1fr));gap:24px}
+    @media(max-width:1200px){.grid{grid-template-columns:repeat(2,minmax(280px,1fr))}}
+    @media(max-width:760px){.layout{grid-template-columns:1fr}.grid{grid-template-columns:1fr}.topbar{grid-template-columns:1fr}}
+    .card{background:var(--card);border:1px solid var(--bd);border-radius:22px;box-shadow:var(--shadow);padding:20px}
+    .card h3{margin:0 0 6px 0;font-size:22px;letter-spacing:.2px}
+    .row-head{display:flex;align-items:center;gap:14px;margin-bottom:10px}
+    .avatar{width:46px;height:46px;border-radius:50%;background:#22c55e;color:#fff;display:grid;place-items:center;font-weight:800}
+    .badge{display:inline-block;padding:4px 10px;border-radius:999px;font-size:12px;font-weight:800;color:#fff;margin-top:4px}
+      .badge-bank{background:var(--blue)}
+      .badge-laci{background:var(--amber)}
+      .badge-server{background:var(--yellow);color:#1f2937}
+    .kv{margin:4px 0;font-size:16px}
+    .kv b{color:var(--red)}
+    .muted{color:var(--muted);font-size:13px}
+    .actions{margin-top:12px;display:flex;gap:8px;flex-wrap:wrap}
+    .btn-ghost{background:#f1f5f9}
+    /* Modal */
+    .modal{position:fixed;inset:0;background:rgba(2,6,23,.45);display:none;align-items:center;justify-content:center;padding:12px}
+    .modal.show{display:flex}
+    .dialog{width:min(760px,100%);background:#fff;border-radius:16px;border:1px solid var(--bd);overflow:hidden;box-shadow:0 12px 30px rgba(0,0,0,.18)}
+    .dlg-hd{background:#0ea5e9;color:#fff;padding:12px 16px;font-weight:800;display:flex;justify-content:space-between;align-items:center}
+    .dlg-bd{padding:14px;display:grid;gap:12px}
+    .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    @media(max-width:860px){.row{grid-template-columns:1fr}}
+    label{font-size:12px;color:#475569;margin-bottom:6px;display:block}
+    .icon-input{display:flex;gap:8px;align-items:center;border:1px solid var(--bd);border-radius:10px;padding:10px 12px;background:#fff}
+    .icon-input input,.icon-input select, .icon-input textarea{border:none;outline:none;flex:1;font-size:14px;background:transparent}
+    .dlg-ft{display:flex;justify-content:flex-end;gap:8px;padding:12px 16px;border-top:1px solid var(--bd);background:#fafafa}
+  </style>
+</head>
+<body>
+
+<div class="layout">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="brand">AMKO</div>
+    <nav class="nav">
+      <a href="dashboard.html">🏠 Dashboard</a>
+      <a class="active" href="master-saldo-akun.html">💳 Master Akun Saldo</a>
+      <a href="transaksi-mini-atm.html">🏧 Transaksi Mini ATM</a>
+      <a href="#" id="lnk-logout">🚪 Logout</a>
+    </nav>
+  </aside>
+
+  <!-- MAIN -->
+  <div>
+    <header>
+      <h2 style="margin:0">Master Akun Saldo</h2>
+      <div id="me" class="muted">memuat…</div>
+    </header>
+
+    <div class="content">
+      <!-- BAR ATAS -->
+      <div class="topbar">
+        <button id="btnAdd" class="btn btn-primary">+ Tambah Data</button>
+        <div class="searchbar">
+          <input id="q" class="input" placeholder="Cari Bank / Ewallet / Server Pulsa…">
+          <button id="btnCari" class="btn btn-blue">🔍 Cari</button>
+          <button id="btnClear" class="btn btn-gray">✖ Clear</button>
+        </div>
+      </div>
+
+      <!-- GRID KARTU -->
+      <div id="grid" class="grid"></div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="modal" id="modal">
+  <div class="dialog">
+    <div class="dlg-hd">
+      <span id="dlgTitle">Tambah Master Saldo</span>
+      <button class="btn btn-ghost" id="btnClose">✖</button>
+    </div>
+    <div class="dlg-bd">
+      <div class="row">
+        <div>
+          <label>Jenis Saldo</label>
+          <div class="icon-input">
+            <span>📂</span>
+            <!-- enum: cash | rekening | server_pulsa -->
+            <select id="m_type" required>
+              <option value="">Pilih Jenis Saldo</option>
+              <option value="rekening">REKENING</option>
+              <option value="cash">CASH</option>
+              <option value="server_pulsa">SERVER PULSA</option>
+            </select>
+          </div>
+        </div>
+        <div>
+          <label>Nama Platform</label>
+          <div class="icon-input">
+            <span>🏦</span>
+            <input id="m_name" placeholder="Contoh: BRI (538) / LACI TUNAI / ORDER KUOTA" required />
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div>
+          <label>Saldo</label>
+          <div class="icon-input">
+            <span>Rp</span>
+            <input id="m_saldo" inputmode="numeric" placeholder="0" />
+          </div>
+        </div>
+        <div>
+          <label>&nbsp;</label>
+          <label class="icon-input" style="gap:10px">
+            <input id="m_is_opening" type="checkbox" />
+            Jadikan Saldo Awal
+          </label>
+        </div>
+      </div>
+
+      <div>
+        <label>Keterangan</label>
+        <div class="icon-input">
+          <textarea id="m_note" rows="3" placeholder="Catatan jika perlu..."></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="dlg-ft">
+      <button class="btn" id="btnCancel">❌ Batal</button>
+      <button class="btn btn-primary" id="btnSave">✔ Simpan</button>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+  import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+
+  // GANTI jika perlu (punya kamu sendiri)
+  const supabase = createClient(
+    "https://saohnqxderqfuvgfvoam.supabase.co",
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNhb2hucXhkZXJxZnV2Z2Z2b2FtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc2MjUzNjksImV4cCI6MjA3MzIwMTM2OX0.oKexUwapMuRr4PqBz78sG2IXML0_ZGRGoT9K3vYB7_M"
+  )
+
+  const $ = (id)=>document.getElementById(id)
+  const fmtRp = n => "Rp " + new Intl.NumberFormat('id-ID').format(Number(n||0))
+  const TYPE_BADGE = t => t==='rekening' ? 'badge-bank'
+                         : t==='cash' ? 'badge-laci'
+                         : 'badge-server'
+  const TYPE_LABEL = { rekening:'BANK', cash:'CASH', server_pulsa:'SERVER PULSA' }
+
+  let gUser=null, gBranch=null, gRole=null
+  let editId=null
+  let cacheRows=[]
+
+  async function boot(){
+    const { data:{ session } } = await supabase.auth.getSession()
+    if(!session){ location.href="login.html"; return }
+    gUser = session.user
+
+    const { data: prof, error } = await supabase
+      .from('profiles').select('role,branch_code,full_name,email')
+      .eq('id', gUser.id).single()
+
+    if(error){ alert("Gagal ambil profil: "+error.message); return }
+    gRole   = prof.role
+    gBranch = prof.branch_code
+    $('me').textContent = `${prof.role} • ${prof.branch_code}`
+
+    loadAccounts()
+  }
+
+  async function loadAccounts(){
+    const { data, error } = await supabase
+      .from('accounts')
+      .select('id,name,account_type,saldo,saldo_awal,note,updated_at')
+      .eq('branch_code', gBranch)
+      .order('name')
+
+    if(error){ alert("Gagal ambil akun: "+error.message); return }
+    cacheRows = data || []
+
+    // --- PIN LACI TUNAI KE PALING DEPAN ---
+    cacheRows.sort((a,b)=>{
+      const aLaci = a.account_type==='cash' && (a.name||'').toLowerCase().includes('laci')
+      const bLaci = b.account_type==='cash' && (b.name||'').toLowerCase().includes('laci')
+      if(aLaci && !bLaci) return -1
+      if(!aLaci && bLaci) return 1
+      return (a.name||'').localeCompare(b.name||'')
+    })
+
+    renderCards(cacheRows)
+  }
+
+  function renderCards(rows){
+    const q = $('q').value.trim().toLowerCase()
+    const list = rows.filter(a => !q || a.name.toLowerCase().includes(q))
+
+    $('grid').innerHTML = list.map(a=>{
+      const inisial = (a.name||'?').trim().charAt(0).toUpperCase()
+      const badgeCls = TYPE_BADGE(a.account_type)
+      const badgeTxt = TYPE_LABEL[a.account_type] || a.account_type
+      const updated  = a.updated_at ? new Date(a.updated_at).toLocaleDateString('id-ID',{day:'2-digit',month:'short',year:'numeric'}) : '-'
+      const isLaci   = a.account_type==='cash' && (a.name||'').toLowerCase().includes('laci')
+
+      return `
+        <div class="card">
+          <div class="row-head">
+            <div class="avatar">${inisial}</div>
+            <div style="flex:1">
+              <h3>${a.name}</h3>
+              <span class="badge ${badgeCls}">${badgeTxt}</span>
+            </div>
+          </div>
+
+          <div class="kv">Saldo : <b>${fmtRp(a.saldo)}</b></div>
+          <div class="kv" style="margin-top:4px">Saldo Awal : <b>${fmtRp(a.saldo_awal)}</b></div>
+
+          <div class="muted" style="margin-top:10px">Update: ${updated}</div>
+          <div class="muted">Keterangan : ${a.note ? a.note : '-'}</div>
+
+          <div class="actions">
+            <button class="btn btn-ghost" onclick="editAccount('${a.id}')">✎ Edit</button>
+            ${(!isLaci && gRole==='owner')
+              ? `<button class="btn" style="background:#fee2e2;color:#991b1b" onclick="delAccount('${a.id}')">🗑 Hapus</button>`
+              : ``}
+          </div>
+        </div>
+      `
+    }).join('')
+  }
+
+  // ========== Pencarian ==========
+  $('btnCari').onclick = ()=> renderCards(cacheRows)
+  $('btnClear').onclick = ()=> { $('q').value=''; renderCards(cacheRows) }
+  $('q').addEventListener('keydown', e => { if(e.key==='Enter') renderCards(cacheRows) })
+
+  // ===== Modal helpers =====
+  function openModal(title){
+    $('dlgTitle').textContent = title
+    $('modal').classList.add('show')
+  }
+  function closeModal(){
+    $('modal').classList.remove('show')
+    editId=null
+    $('m_type').value=''
+    $('m_name').value=''
+    $('m_saldo').value=''
+    $('m_is_opening').checked=false
+    $('m_note').value=''
+  }
+  $('btnAdd').onclick = ()=>{
+    if(gRole!=='owner'){ alert('Hanya Owner yang boleh menambah akun'); return }
+    openModal('Tambah Master Saldo')
+  }
+  $('btnClose').onclick = $('btnCancel').onclick = closeModal
+
+  // ===== Format ribuan pada input saldo =====
+  const saldoInput = $('m_saldo')
+  saldoInput.addEventListener('input', e=>{
+    const raw = e.target.value.replace(/\D/g,'')
+    e.target.value = raw ? new Intl.NumberFormat('id-ID').format(Number(raw)) : ''
+  })
+  saldoInput.addEventListener('paste', e=>{
+    e.preventDefault()
+    const text = (e.clipboardData || window.clipboardData).getData('text')
+    const digits = (text||'').replace(/\D/g,'')
+    saldoInput.value = digits ? new Intl.NumberFormat('id-ID').format(Number(digits)) : ''
+  })
+
+  // ===== CRUD =====
+  window.editAccount = async (id)=>{
+    const { data, error } = await supabase.from('accounts')
+      .select('*').eq('id', id).single()
+    if(error){ alert(error.message); return }
+    editId = id
+    $('m_type').value  = data.account_type
+    $('m_name').value  = data.name
+    $('m_saldo').value = new Intl.NumberFormat('id-ID').format(Number(data.saldo||0))
+    $('m_is_opening').checked = false
+    $('m_note').value  = data.note||''
+    openModal('Edit Akun Saldo')
+  }
+
+  window.delAccount = async (id)=>{
+    // Cegah hapus Laci Tunai meski owner
+    const { data, error } = await supabase.from('accounts')
+      .select('id,name,account_type').eq('id', id).single()
+    if(error){ alert(error.message); return }
+    const isLaci = data && data.account_type==='cash' && (data.name||'').toLowerCase().includes('laci')
+    if(isLaci){ alert("Akun LACI TUNAI tidak dapat dihapus."); return }
+
+    if(gRole!=='owner'){ alert('Hanya Owner yang boleh menghapus akun'); return }
+    if(!confirm('Yakin hapus akun ini?')) return
+    const { error:errDel } = await supabase.from('accounts').delete().eq('id', id)
+    if(errDel){ alert(errDel.message); return }
+    loadAccounts()
+  }
+
+  $('btnSave').onclick = async ()=>{
+    const type = $('m_type').value
+    const name = $('m_name').value.trim()
+    const saldo = Number(String($('m_saldo').value).replace(/[^0-9]/g,'')) || 0
+    const makeOpening = $('m_is_opening').checked
+    const note = $('m_note').value.trim()
+
+    if(!type || !name){ alert('Jenis & Nama wajib diisi'); return }
+
+    // ==== ANTI DUPLIKASI LACI TUNAI (maks. 1 per cabang) ====
+    const isLaciCandidate = type==='cash' && /laci/i.test(name)
+    if(isLaciCandidate){
+      const { data: exist, error: errExist } = await supabase
+        .from('accounts')
+        .select('id')
+        .eq('branch_code', gBranch)
+        .eq('account_type', 'cash')
+        .ilike('name', '%laci%')
+      if(errExist){ alert('Cek duplikasi gagal: '+errExist.message); return }
+      const already = (exist||[]).some(r => r.id !== editId)
+      if(already){
+        alert('Akun LACI TUNAI sudah ada untuk cabang ini. Tidak boleh lebih dari satu.')
+        return
+      }
+    }
+
+    if(editId){
+      const patch = {
+        account_type: type,
+        name, saldo, note,
+        updated_at: new Date().toISOString()
+      }
+      if(makeOpening){ patch.saldo_awal = saldo }
+      const { error } = await supabase.from('accounts').update(patch).eq('id', editId)
+      if(error){ alert('Simpan gagal: '+error.message); return }
+    }else{
+      if(gRole!=='owner'){ alert('Hanya Owner yang boleh menambah akun'); return }
+      const row = {
+        account_type: type,
+        name,
+        saldo,
+        saldo_awal: makeOpening ? saldo : 0,
+        branch_code: gBranch,
+        note
+      }
+      const { error } = await supabase.from('accounts').insert(row)
+      if(error){ alert('Simpan gagal: '+error.message); return }
+    }
+    closeModal()
+    loadAccounts()
+  }
+
+  // logout
+  document.getElementById('lnk-logout').addEventListener('click', async ()=>{
+    await supabase.auth.signOut(); location.href="login.html"
+  })
+
+  boot()
+</script>
+</body>
+</html>

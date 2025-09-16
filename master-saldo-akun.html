@@ -163,11 +163,11 @@
   </div>
 </div>
 
-<script type="module">
-  import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
-
-  // GANTI jika perlu (punya kamu sendiri)
-  const supabase = createClient(
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  // Supabase via CDN global (no ESM)
+// GANTI jika perlu (punya kamu sendiri)
+  const supabase = window.supabase.createClient(
     "https://saohnqxderqfuvgfvoam.supabase.co",
     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNhb2hucXhkZXJxZnV2Z2Z2b2FtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc2MjUzNjksImV4cCI6MjA3MzIwMTM2OX0.oKexUwapMuRr4PqBz78sG2IXML0_ZGRGoT9K3vYB7_M"
   )
